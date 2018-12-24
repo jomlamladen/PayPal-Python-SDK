@@ -23,7 +23,29 @@ billing_agreement = BillingAgreement({
     }
 })
 
-if billing_agreement.create():
-    print("Billing Agreement created successfully")
+# Parse links and get agreement id
+def get_agreement_id(links):
+    for link in links:
+        if link.rel == "approval_url":
+            return parse.parse_qs(parse.urlparse(link.href).query)["token"][0]
+
+if billing_agreement.create(None, None, True):
+    result = {
+        "id": get_agreement_id(billing_agreement.links),
+        "name": billing_agreement.name,
+        "description": billing_agreement.description,
+        "plan_state": billing_agreement.plan.state,
+        "start_date": billing_agreement.start_date,
+        "links": [
+            {
+                "href": link.href,
+                "rel": link.rel,
+                "method": link.method
+            } for link in billing_agreement.links
+        ]
+    }
+    
+    #print(result)
+    print("Billing Agreement created successfully with id {}".format(result['id']))
 else:
     print(billing_agreement.error)
