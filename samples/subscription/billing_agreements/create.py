@@ -23,15 +23,15 @@ billing_agreement = BillingAgreement({
     }
 })
 
-# Parse links and get agreement id
-def get_agreement_id(links):
+# Parse links and get payment token
+def get_payment_token(links):
     for link in links:
         if link.rel == "approval_url":
             return parse.parse_qs(parse.urlparse(link.href).query)["token"][0]
 
 if billing_agreement.create(None, None, True):
     result = {
-        "id": get_agreement_id(billing_agreement.links),
+        "id": get_payment_token(billing_agreement.links),
         "name": billing_agreement.name,
         "description": billing_agreement.description,
         "plan_state": billing_agreement.plan.state,
